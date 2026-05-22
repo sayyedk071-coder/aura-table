@@ -529,6 +529,7 @@ async function notifyReservation(record) {
   }
 }
 
+async function handleReservation(req, res) {
   await Promise.allSettled([
     sendMail({
       to: NOTIFY_TO,
