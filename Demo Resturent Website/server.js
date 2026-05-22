@@ -503,21 +503,30 @@ async function sendMail({ to, subject, text: body }) {
 }
 
 async function notifyReservation(record) {
-  // Trigger Web3Forms Notification
-  fetch('https://api.web3forms.com/submit', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      access_key: "8cedcb5e-2953-4d61-a715-53939e49d45a",
-      subject: "New Aura Table Booking: " + record.bookingCode,
-      name: record.name,
-      email: record.email,
-      phone: record.phone,
-      date: record.date,
-      time: record.time,
-      guests: record.guests
+  const lines = [
+    `New reservation: ${record.bookingCode}`,
+    `Name: ${record.name}`,
+    `Email: ${record.email}`,
+    `Phone: ${record.phone}`,
+    `Date: ${record.date}`,
+    `Time: ${record.time}`,
+    `Guests: ${record.guests}`,
+    `Occasion: ${record.occasion}`,
+    `Notes: ${record.notes || "None"}`
+  ];
+
+  await Promise.allSettled([
+    sendMail({
+      to: NOTIFY_TO,
+      subject: `New reservation ${record.bookingCode}`,
+      text: lines.join("\n")
+    }),
+    sendMail({
+      to: record.email,
+      subject: `Aura Table reservation ${record.bookingCode}`,
+      text: `Thank you ${record.name}. Your Aura Table reservation is confirmed.\n\n${lines.join("\n")}`
     })
-  }).catch(err => console.log("Web3Forms failed:", err));
+  ]);
 }
 
   await Promise.allSettled([
