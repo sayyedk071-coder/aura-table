@@ -503,17 +503,31 @@ async function sendMail({ to, subject, text: body }) {
 }
 
 async function notifyReservation(record) {
-  const lines = [
-    `New reservation: ${record.bookingCode}`,
-    `Name: ${record.name}`,
-    `Email: ${record.email}`,
-    `Phone: ${record.phone}`,
-    `Date: ${record.date}`,
-    `Time: ${record.time}`,
-    `Guests: ${record.guests}`,
-    `Occasion: ${record.occasion}`,
-    `Notes: ${record.notes || "None"}`
-  ];
+  try {
+    await fetch('https://api.web3forms.com/submit', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({
+        access_key: "8cedcb5e-2953-4d61-a715-53939e49d45a",
+        subject: "New Booking: " + record.bookingCode,
+        from_name: "Aura Table Notifications",
+        Name: record.name,
+        Email: record.email,
+        Phone: record.phone,
+        Date: record.date,
+        Time: record.time,
+        Guests: record.guests,
+        Occasion: record.occasion,
+        Notes: record.notes || "None"
+      })
+    });
+  } catch (error) {
+    console.log("Web3Forms failed:", error);
+  }
+}
 
   await Promise.allSettled([
     sendMail({
