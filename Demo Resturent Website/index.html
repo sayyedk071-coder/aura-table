@@ -55,7 +55,7 @@
       overflow: hidden;
     }
 
-    body.menu-open > :not(.menu-overlay) {
+    body.menu-open> :not(.menu-overlay) {
       filter: blur(12px) saturate(0.82);
       transform: scale(0.992);
       transition: filter 260ms ease, transform 260ms ease;
@@ -1245,7 +1245,7 @@
     }
 
     @media (max-width: 1024px) {
-      .nav > a.btn-primary[href="#booking"] {
+      .nav>a.btn-primary[href="#booking"] {
         display: none !important;
       }
     }
@@ -1405,6 +1405,7 @@
         grid-template-columns: 1fr 1fr;
       }
     }
+
     .whatsapp-float {
       position: fixed;
       right: 24px;
@@ -1700,9 +1701,8 @@
         <div class="trust-grid">
           <div class="map-card reveal">
             <iframe class="map-frame"
-              src="https://www.google.com/maps?q=Nagpur%2C%20Maharashtra%2C%20India&output=embed"
-              loading="lazy" referrerpolicy="no-referrer-when-downgrade"
-              title="Aurora Table location on Google Maps"></iframe>
+              src="https://www.google.com/maps?q=Nagpur%2C%20Maharashtra%2C%20India&output=embed" loading="lazy"
+              referrerpolicy="no-referrer-when-downgrade" title="Aurora Table location on Google Maps"></iframe>
             <div class="trust-meta">
               <span class="trust-pill">Nagpur, Maharashtra, India</span>
               <span class="trust-pill">Open daily from lunch to late night</span>
@@ -1782,9 +1782,12 @@
       </div>
       <div class="menu-book-photo-strip">
         <div class="menu-book-photo"><img src="assets/images/menu/biryani.jpg" alt="Biryani in clay pots" /></div>
-        <div class="menu-book-photo"><img src="assets/images/menu/masala-dosa.jpg" alt="Masala dosa with chutneys" /></div>
-        <div class="menu-book-photo"><img src="assets/images/menu/butter-chicken.jpg" alt="Butter chicken with naan" /></div>
-        <div class="menu-book-photo"><img src="assets/images/menu/chicken-tikka-masala.jpg" alt="Chicken tikka masala with naan" /></div>
+        <div class="menu-book-photo"><img src="assets/images/menu/masala-dosa.jpg" alt="Masala dosa with chutneys" />
+        </div>
+        <div class="menu-book-photo"><img src="assets/images/menu/butter-chicken.jpg" alt="Butter chicken with naan" />
+        </div>
+        <div class="menu-book-photo"><img src="assets/images/menu/chicken-tikka-masala.jpg"
+            alt="Chicken tikka masala with naan" /></div>
       </div>
       <div class="menu-book-grid">
         <section class="menu-page">
@@ -2011,6 +2014,14 @@
     <span>WhatsApp</span>
   </a>
 
+  <form action="https://api.web3forms.com/submit" method="POST">
+    <input type="hidden" name="access_key" value="8cedcb5e-2953-4d61-a715-53939e49d45a">
+    <input type="text" name="name" required>
+    <input type="email" name="email" required>
+    <textarea name="message" required></textarea>
+    <button type="submit">Submit Form</button>
+  </form>
+
   <script src="config.js"></script>
   <script>
     const nav = document.querySelector('.nav');
@@ -2145,6 +2156,43 @@
         newsletterMessage.textContent = error.message;
       } finally {
         submitButton.disabled = false;
+      }
+    });
+
+    const form = document.getElementById('form');
+    const submitBtn = form.querySelector('button[type="submit"]');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const formData = new FormData(form);
+      formData.append("access_key", "8cedcb5e-2953-4d61-a715-53939e49d45a");
+
+      const originalText = submitBtn.textContent;
+
+      submitBtn.textContent = "Sending...";
+      submitBtn.disabled = true;
+
+      try {
+        const response = await fetch("https://api.web3forms.com/submit", {
+          method: "POST",
+          body: formData
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          alert("Success! Your message has been sent.");
+          form.reset();
+        } else {
+          alert("Error: " + data.message);
+        }
+
+      } catch (error) {
+        alert("Something went wrong. Please try again.");
+      } finally {
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
       }
     });
   </script>
