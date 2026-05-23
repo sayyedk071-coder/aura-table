@@ -8,7 +8,7 @@
   <meta name="description"
     content="Aurora Table is a modern restaurant website with immersive dining visuals, animated menu sections, and a reservation booking experience." />
   <meta http-equiv="Content-Security-Policy"
-    content="default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'self'; upgrade-insecure-requests; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; frame-src https://www.google.com; connect-src 'self' http://localhost:3400 http://127.0.0.1:3400 https:; form-action 'self' https://api.web3forms.com;">
+    content="default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'self'; upgrade-insecure-requests; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; frame-src https://www.google.com; connect-src 'self' http://localhost:3400 http://127.0.0.1:3400 https:; form-action 'self';">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=(self), payment=()">
   <meta http-equiv="X-Content-Type-Options" content="nosniff">
@@ -1624,12 +1624,7 @@
           </div>
         </div>
         <div class="booking-card reveal">
-
-          <form action="https://api.web3forms.com/submit" method="POST" id="bookingForm">
-
-            <input type="hidden" name="access_key" value="8cedcb5e-2953-4d61-a715-53939e49d45a">
-            <input type="hidden" name="redirect" value="https://aura-table.onrender.com">
-
+          <form id="bookingForm">
             <div class="field">
               <label for="name">Full Name</label>
               <input id="name" name="name" type="text" placeholder="Your name" required />
@@ -1685,11 +1680,13 @@
               <label for="notes">Special Request</label>
               <textarea id="notes" name="notes" placeholder="Window table, allergies, celebration note..."></textarea>
             </div>
+            <input id="bookingCode" name="booking_code" type="hidden" />
+            <input id="submittedAt" name="submitted_at" type="hidden" />
             <div class="form-actions">
               <button class="btn btn-dark" type="submit">Confirm Booking</button>
+              <span class="booking-message" id="bookingMessage" role="status"></span>
             </div>
           </form>
-
         </div>
       </div>
     </section>
@@ -2017,6 +2014,22 @@
     <span>WhatsApp</span>
   </a>
 
+  <form action="https://api.web3forms.com/submit" method="POST">
+
+    <input type="hidden" name="access_key" value="8cedcb5e-2953-4d61-a715-53939e49d45a">
+
+    <input type="hidden" name="redirect" value="https://aura-table.onrender.com">
+
+    <input type="text" name="Name" placeholder="Full Name" required>
+    <input type="email" name="Email" placeholder="Email Address" required>
+    <input type="tel" name="Phone" placeholder="Phone Number" required>
+    <input type="date" name="Date" required>
+    <input type="time" name="Time" required>
+    <input type="number" name="Guests" placeholder="Number of Guests" required>
+
+    <button type="submit">Book Table</button>
+  </form>
+
   <script src="config.js"></script>
   <script>
     const nav = document.querySelector('.nav');
@@ -2117,7 +2130,26 @@
       return data;
     };
 
-    ('submit', async (event) => {
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const data = Object.fromEntries(new FormData(form).entries());
+      const submitButton = form.querySelector('button[type="submit"]');
+      submitButton.disabled = true;
+      message.textContent = 'Confirming your reservation...';
+
+      try {
+        const result = await postJson('/api/reservations', data);
+        message.textContent = `Reserved! Confirmation ${result.bookingCode}`;
+        form.reset();
+        dateInput.min = today.toISOString().split('T')[0];
+      } catch (error) {
+        message.textContent = error.message;
+      } finally {
+        submitButton.disabled = false;
+      }
+    });
+
+    newsletterForm.addEventListener('submit', async (event) => {
       event.preventDefault();
       const submitButton = newsletterForm.querySelector('button[type="submit"]');
       submitButton.disabled = true;
