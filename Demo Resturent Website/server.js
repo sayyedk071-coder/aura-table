@@ -503,46 +503,17 @@ async function sendMail({ to, subject, text: body }) {
 }
 
 async function notifyReservation(record) {
-  try {
-    await fetch('https://api.web3forms.com/submit', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      },
-      body: JSON.stringify({
-        access_key: "8cedcb5e-2953-4d61-a715-53939e49d45a",
-        subject: "New Booking: " + record.bookingCode,
-        from_name: "Aura Table Notifications",
-        Name: record.name,
-        Email: record.email,
-        Phone: record.phone,
-        Date: record.date,
-        Time: record.time,
-        Guests: record.guests,
-        Occasion: record.occasion,
-        Notes: record.notes || "None"
-      })
-    });
-  } catch (error) {
-    console.log("Web3Forms failed:", error);
-  }
-}
-
-async function handleReservation(req, res) {
-  await Promise.allSettled([
-    sendMail({
-      to: NOTIFY_TO,
-      subject: `New reservation ${record.bookingCode}`,
-      text: lines.join("\n")
-    }),
-    sendMail({
-      to: record.email,
-      subject: `Aura Table reservation ${record.bookingCode}`,
-      text: `Thank you ${record.name}. Your Aura Table reservation is confirmed.\n\n${lines.join("\n")}`
-    })
-  ]);
-}
+  const lines = [
+    `New reservation: ${record.bookingCode}`,
+    `Name: ${record.name}`,
+    `Email: ${record.email}`,
+    `Phone: ${record.phone}`,
+    `Date: ${record.date}`,
+    `Time: ${record.time}`,
+    `Guests: ${record.guests}`,
+    `Occasion: ${record.occasion}`,
+    `Notes: ${record.notes || "None"}`
+  ];
 
   await Promise.allSettled([
     sendMail({
@@ -620,13 +591,13 @@ async function handleAdminLogin(req, res) {
 
   const token = createSession();
   sendJson(res, 200, { message: "Logged in" }, {
-    "Set-Cookie": `aura_admin=${encodeURIComponent(token)}; HttpOnly; SameSite=Lax; Path=/; Max-Age=${ADMIN_SESSION_HOURS * 60 * 60}${IS_PRODUCTION ? "; Secure" : ""}`
+    "Set-Cookie": `aura_admin=${encodeURIComponent(token)}; HttpOnly; SameSite=None; Secure; Path=/; Max-Age=${ADMIN_SESSION_HOURS * 60 * 60}`
   });
 }
 
 async function handleAdminLogout(req, res) {
   sendJson(res, 200, { message: "Logged out" }, {
-    "Set-Cookie": `aura_admin=; HttpOnly; SameSite=Lax; Path=/; Max-Age=0${IS_PRODUCTION ? "; Secure" : ""}`
+    "Set-Cookie": `aura_admin=; HttpOnly; SameSite=None; Secure; Path=/; Max-Age=0`
   });
 }
 
